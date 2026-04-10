@@ -1,0 +1,282 @@
+---
+title: "Bullseye analysis"
+Author: Mathieu Flamand
+---
+
+Load required librariesl custom functions for glm fitting
+
+```{r}
+library(tidyverse)
+library(aod)
+# suppressPackageStartupMessages(library(cowplot))
+# suppressPackageStartupMessages(library(IHW))
+# ensembl=biomaRt::useMart("ensembl", dataset = "hsapiens_gene_ensembl") 
+
+getID<- function(x){
+ y<-biomaRt::getBM(attributes = c('external_gene_name','gene_biotype','entrezgene_id','ensembl_gene_id'),
+                  filters = 'external_gene_name',
+                  values = x$external_gene_name,
+                  mart = ensembl)
+                  return(y)
+                  
+ }
+
+source("functions.R")
+```
+
+Read list of called sites in bullseye
+
+```{r}
+
+#this is the bed file you used for the quantify_sites.pl
+
+edit_sites<-read_delim("ifit3.01.bed", delim = "\t", col_names = c("chr","start","end","name","score","strand","control", "control_cov", "x","cov","type","n_rep")) %>%
+  dplyr::select(-x) %>% 
+  separate(name, into=c("external_gene_name","biotype","type1","nmut","fold"), sep = "([|])") %>%
+  separate(nmut, into = c("lab","nmut"),sep="([=])") %>% dplyr::select(-type1, lab) %>%
+  mutate(fold=as.numeric(fold)) 
+
+#temp<-getID(edit_sites)
+#edit_sites_annotated<- left_join(edit_sites, distinct(temp), by="external_gene_name")
+#rm(temp)
+
+```
+
+Read coverage and mutation matrices with data for every samples
+
+```{r}
+
+#these are the output from gather_score.pl
+
+edit_cov<-read.delim("ifit3_01_adar_bg_gathered.coverage.txt") %>% dplyr::mutate(name=paste(X.chr,start,end,strand,sep="_")) %>%  ## generate a unique name for each site (chr_start_end_strand)
+  dplyr::select(!1:5)%>% # only keep values
+  tibble::column_to_rownames(., 'name') 
+
+edit_mut<-read.delim("ifit3_01_adar_bg_gathered.mut.txt")%>% 
+  dplyr::mutate(name=paste(X.chr,start,end,strand,sep="_")) %>% 
+  dplyr::select(!1:5)%>% 
+  tibble::column_to_rownames(., 'name') 
+```
+```{r}
+#Do some pre-filtering before the GLM
+edit_mut[is.na(edit_mut) & !is.na(edit_cov)] <- 0
+```
+
+Generate a dataframe containing sample information
+
+This is similar to DESeq2 coldata. We want to have one row per sample, and a column indicating the conditions by which the data will be modeled in the GLM.
+
+```{r}
+# get sample names from previous table
+samples <- names(edit_cov) 
+
+# create the table with the "factors"
+
+editor = factor(c(rep("ADAR_only", 3), rep("ADAR_IFIT3", 3)),levels=c("ADAR_only","ADAR_IFIT3")) 
+
+
+
+gene = c(rep("ADAR_only", 3), rep("IFIT3",3)) # First factor, protein expressed in cells, assuming 3 replicates for each sample
+repn = c(rep(rep(c("rep1","rep2","rep3"),2))) # number of replicates for each sample
+
+# other factors can be added here depending on your experimental design
+
+#make colData
+colData<- data.frame(row.names = samples, gene = gene, repn=repn ) # adding additional row for additional factors if necessary 
+
+#generate new name for each sample
+colData<-colData %>% mutate(name=paste(gene,repn,sep="_")) #make sure the order matches the sample name
+
+# for the function to work, each sample needs to contain the factor level in its name
+row.names(colData)<- colData$name
+
+names(edit_cov)<-colData$name
+
+names(edit_mut)<-colData$name
+
+```
+
+For all sites, fit data in GLM and extract log2foldChanges, significance between conditions
+
+for binomial GLM, use link='bin', for quasibinomial: link='quasibinomial', for beta binomial: link='betabin'
+
+
+```{r}
+results_qbin <-Bullseye(data_cov=edit_cov, #coverage matrix
+                        data_mut=edit_mut, #mutation matrix
+                        colData = colData,
+                        min.cov=10, #sites with coverage below this threshold will be ignored 
+                        min = 0.01, # minimal editing rate to call a site, this will be used to calculate the average editing in called sites. (2 averages are reported, in all samples and in called sites)
+                        design = ~gene, # design for the GLM, 1 factor design only
+                        link='quasibinomial')
+
+# Save an object to file
+saveRDS(results_qbin, file = "results_qbin.rds")
+
+```
+
+
+The resulting tables contains the following 
+
+For each factor in the design:
+ - sum of coverage in all samples (factor_sum_cov)
+ - sum of all mutation in all samples (factor_mut)
+ - average editing in all samples (factor)
+ - number of samples with more coverage than selected with min.cov option (factor_min_cov)
+ - number of sample where site is "called", meaning more than indicated with min option (factor_called_sites)
+ - average editing in "called" sites (factor_average_called)
+ - Log2FoldChange over reference level (factor_log2FoldChange). This is strictly the average editing in all samples / average editing in reference level
+ - LFC (also Log2FoldChange) (factor_LFC) this is log2 fold change is calculated from the GLM fitted data. This is more conservative and what I usually use
+ - results of Wald test for significance (factor_pvalue)
+ - average editing across all samples (baseEdit)
+ 
+
+We can then adjust pvalues for multiple comparisons
+
+```{r}
+
+#Using FDR 
+
+results_qbin<- results_qbin %>%
+  mutate(padj=p.adjust(IFIT3_pvalue)) %>% 
+  ungroup() %>% 
+  mutate(padj=replace_na(padj,1)) %>% 
+  mutate(signif = padj<=0.05 ) # adjusted p_value of 0.05
+
+```
+
+Filter sites with desired parameters
+
+```{r}
+
+# Summarize data: 
+
+#r1<-results_qbin %>% group_by(signif) %>% summarize(n=n()))$n
+
+#t1<-data.frame("ADAR_only_vs_IFIT3"= r1, row.names=c("not significant", "significant")) %>%    bind_rows(summarise(.,
+#                      across(where(is.numeric), sum),
+#                      across(where(is.character), ~"Total")))
+#row.names(t1)<- c("not significant", "significant", "total")
+
+#t1
+
+#example for sites with more than 10% editing, 2 fold over control and adjuster pvalue < 0.05
+filtered_res<-results_qbin %>% filter( ADAR_only_min_cov==3,IFIT3_min_cov==3,IFIT3_called_sites==3)
+
+#this is the bed file overlap from initial analyses
+
+overlap_sites<-read_delim("IFIT3_ADAR_shared_nf.bed", delim = "\t", col_names = c("chr","start","end","name","score","strand","control", "control_cov", "x","cov","type","n_rep")) %>%
+  dplyr::select(-x) %>% 
+  separate(name, into=c("external_gene_name","biotype","type1","nmut","fold"), sep = "([|])") %>%
+  separate(nmut, into = c("lab","nmut"),sep="([=])") %>% dplyr::select(-type1, lab) %>%
+  mutate(fold=as.numeric(fold)) 
+
+#filter the overlaps
+# 1. Make the site column in the reference data frame
+overlap_sites$site <- paste(overlap_sites$chr, overlap_sites$start, overlap_sites$end, overlap_sites$strand, sep = "_")
+
+# 2. Filter filtered_res
+filtered_res2 <- filtered_res %>%
+  filter(site %in% overlap_sites$site)
+
+#export a bed file if desired
+write_delim(filtered_res, "IFIT3_ADAR_GLM.txt", delim="\t")
+
+```
+
+Plotting average editing rates: 
+
+```{r, fig.height=4, fig.width=4}
+
+results_qbin %>% 
+  arrange(padj) %>% 
+  ggplot(aes(x=ADAR_only,y=IFIT3,color=padj<=0.05))+
+  geom_point() +
+ theme_classic()  +
+  scale_y_continuous(expand=expansion(c(0,0.1)),limits = c(0,1))+
+  scale_x_continuous(expand=expansion(c(0,0.1)),limits = c(0,1))+ # set equal limits for X and Y - its possible to use a log scale to see a better distribution of values.
+  theme(panel.border = element_rect(size=0.5, fill=NA),
+        legend.position = "bottom")
+  
+
+#other plot types are possible here. 
+```
+
+
+## RNA based analysis
+
+We can redo the same analysis but by aggregating editing at the RNA level to identify IFIT3 targets.
+
+```{r}
+
+# its possible to exclude some sites from the analysis here (only keeping sites find above a threshold ratio or minim number of sites)
+edit_sites_annotated_filt<- edit_sites_annotated %>% filter(rep==2,min==0,fold==1.5) %>% 
+  mutate(site=paste(chr,start,end,strand,sep="_"))# 
+
+RNAs_cov<- edit_cov %>% 
+  rownames_to_column("site") %>% 
+  right_join(sites_adar,.) %>% 
+  group_by(ensembl_gene_id) %>% 
+  summarise(across(.cols=ADAR_only_rep1:IFIT3_rep3,.fns=sum) , n=n())%>%  ### Change this line to reflect the column name in your file. (I added names that should reflect you I did earlier, but this may be wrong.
+  filter(!is.na(ensembl_gene_id)) %>% 
+  column_to_rownames("ensembl_gene_id")%>% 
+  ungroup()
+
+RNAs_mut<- edit_mut %>% 
+  rownames_to_column("site") %>% 
+  right_join(sites_adar,.) %>% 
+  group_by(ensembl_gene_id) %>% 
+  summarise(across(.cols=ADAR_only_rep1:IFIT3_rep3,.fns=sum) , n=n())%>% 
+  filter(!is.na(ensembl_gene_id)) %>% 
+  column_to_rownames("ensembl_gene_id")%>% 
+  ungroup()
+
+RNA.results.qbin <-Bullseye(RNAs_cov_adar, RNAs_mut_adar,
+                             colData =  colData_2,
+                              design = ~gene,link='quasibinomial')
+
+sites_apobec<- all_sites2 %>% filter(rep==2,min==0,fold==1.5) %>% 
+  mutate(site=paste(chr,start,end,strand,sep="_"))# %>%
+  # filter(site %in% exp2_list2$site)
+
+
+RNA.results.qbin<- RNA.results.qbin %>%
+  mutate(padj=p.adjust(TRIM71_pvalue, method = "BH")) %>%
+  ungroup() %>%
+  mutate(padj=replace_na(padj,1))
+
+```
+
+```{r}
+
+res1<-RNA.results.qbin %>% #filter( TRIM71_LFC>=log2(1.5), TRIM71 >=0.01) %>%
+  mutate(signif = padj<=0.05)
+
+r1<- (res1 %>% group_by(signif) %>% summarize(n=n()))$n
+
+t1<-data.frame("ADAR_only_vs_IFIT3"= r1, row.names=c("not significant", "significant")) %>%    bind_rows(summarise(.,
+                      across(where(is.numeric), sum),
+                      across(where(is.character), ~"Total")))
+row.names(t1)<- c("not significant", "significant", "total")
+t1
+
+#filter targets
+TRIBE_signif_targets<-res1 %>% filter(signif==TRUE) %>% select(site, n) %>% rename("ENSEMBL_gene_ID"=site,"n_sites"=n)
+#export file target list if desired
+write_csv(TRIBE_signif_targets, "TRIBE_signif_targets.csv")
+
+
+```
+Example: plotting aggregate editing across RNA targets
+```{r, fig.height=4, fig.width=4}
+RNA.results.qbin %>% 
+  arrange(padj) %>% 
+  ggplot(aes(x=ADAR_only,y=IFIT3,color=padj<=0.05))+
+  geom_point() +
+ theme_classic()  +
+  scale_y_continuous(expand=expansion(c(0,0.1)),limits = c(0,NA))+
+  scale_x_continuous(expand=expansion(c(0,0.1)),limits = c(0,NA))+ # set equal limits for X and Y
+  theme(panel.border = element_rect(size=0.5, fill=NA),
+        legend.position = "bottom")
+  
+```
