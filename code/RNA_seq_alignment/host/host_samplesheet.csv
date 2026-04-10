@@ -1,0 +1,10 @@
+sample,fastq_1,fastq_2,strandedness
+ctl_1,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ctrl1_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ctrl1_R2_001.fastq.gz,unstranded
+ctl_2,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ctrl2_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ctrl2_R2_001.fastq.gz,unstranded
+ctl_3,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ctrl3_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ctrl3_R2_001.fastq.gz,unstranded
+ifit3_1,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ifit31_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ifit31_R2_001.fastq.gz,unstranded
+ifit3_2,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ifit32_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ifit32_R2_001.fastq.gz,unstranded
+ifit3_3,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ifit33_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/ifit33_R2_001.fastq.gz,unstranded
+yth_1,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/yth1_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/yth1_R2_001.fastq.gz,unstranded
+yth_2,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/yth2_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/yth2_R2_001.fastq.gz,unstranded
+yth_3,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/yth3_R1_001.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT279_fastq/yth3_R2_001.fastq.gz,unstranded

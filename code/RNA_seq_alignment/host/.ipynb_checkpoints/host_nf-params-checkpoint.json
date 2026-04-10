@@ -1,0 +1,10 @@
+{
+    "input": "\/cwork\/mt354\/MGT450_HCV_TRIBE_rerun\/MGT450_host_align\/host_samplesheet.csv",
+    "outdir": "\/cwork\/mt354\/MGT450_HCV_TRIBE_rerun\/MGT450_host_align",
+    "fasta": "\/hpc\/group\/hornerlab\/mt354\/genomes\/NCBI\/GRCh38_no_alt_analysis_set.fna",
+    "gtf": "\/hpc\/group\/hornerlab\/mt354\/genomes\/NCBI\/GRCh38_full.gtf",
+    "gff": "\/hpc\/group\/hornerlab\/mt354\/genomes\/NCBI\/GRCh38_full.gff",
+    "star_index": "\/hpc\/group\/hornerlab\/mt354\/genomes\/NCBI\/STAR_index\/GRCh38",
+    "pseudo_aligner": "salmon",
+    "save_unaligned": true,
+}

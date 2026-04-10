@@ -1,0 +1,12 @@
+{
+    "input": "\/cwork\/mt354\/MGT450_HCV_TRIBE_rerun\/MGT450_hcv_align\/hcv_samplesheet.csv",
+    "outdir": "\/cwork\/mt354\/MGT450_HCV_TRIBE_rerun\/MGT450_hcv_align",
+    "fasta": "\/hpc\/group\/hornerlab\/mt354\/genomes\/NCBI\/ncbi_dataset\/data\/GCA_003106005.1\/GCA_003106005.1_ASM310600v1_genomic.fna",
+    "gtf": "\/hpc\/group\/hornerlab\/mt354\/genomes\/NCBI\/ncbi_dataset\/data\/GCA_003106005.1\/jfh1.gtf",
+    "star_index": "\/hpc\/group\/hornerlab\/mt354\/genomes\/NCBI\/STAR_index\/HCV_JFH1",
+    "pseudo_aligner": "salmon",
+    "skip_umi_extract": true,
+    "skip_fastqc": true,
+    "skip_dupradar": true,
+    "skip_trimming": true
+}

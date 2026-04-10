@@ -1,0 +1,10 @@
+sample,fastq_1,fastq_2,strandedness
+ctl_1,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ctl_1.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ctl_1.unmapped_2.fastq.gz,unstranded
+ctl_2,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ctl_2.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ctl_2.unmapped_2.fastq.gz,unstranded
+ctl_3,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ctl_3.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ctl_3.unmapped_2.fastq.gz,unstranded
+ifit3_1,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ifit3_1.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ifit3_1.unmapped_2.fastq.gz,unstranded
+ifit3_2,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ifit3_2.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ifit3_2.unmapped_2.fastq.gz,unstranded
+ifit3_3,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ifit3_3.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/ifit3_3.unmapped_2.fastq.gz,unstranded
+yth_1,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/yth_1.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/yth_1.unmapped_2.fastq.gz,unstranded
+yth_2,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/yth_2.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/yth_2.unmapped_2.fastq.gz,unstranded
+yth_3,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/yth_3.unmapped_1.fastq.gz,/cwork/mt354/MGT450_HCV_TRIBE_rerun/MGT450_host_align/star_salmon/unmapped/yth_3.unmapped_2.fastq.gz,unstranded
