@@ -22,7 +22,9 @@ This repository contains scripts and instructions for reproducing the analyses p
 
 ### Overlap permutation analyses of HyperTRIBE-seq with published CLIP-seq data
 
-
+- `code/Overlap_permutation_analyses` contains a jupyter notebook, companion scripts `overlap_scripts.py`, and job submission scripts.
+- The notebook first describes the preprocessing steps taken to filter published data and prep HyperTRIBE edit data for overlap analyses.
+- Then an example analyses of the overlaps between IFIT3-ADAR and ADAR-YTH (as in 2D) is shown. This workflow was used for all permutation analyses described in the manuscript.
 
 ## Contact
 
